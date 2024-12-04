@@ -1,14 +1,25 @@
 import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { existsSync } from 'fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const dbPath = join(__dirname, '../../items.db');
 
-export const db = new Database(dbPath);
+
+const dbPath = existsSync(join(__dirname, '../../items.db'))
+  ? join(__dirname, '../../items.db')
+  : join(__dirname, 'items.db'); 
+
+
+let db = new Database(dbPath, {
+  verbose: console.log,
+  fileMustExist: false
+});
+
 
 export function initializeDatabase() {
-  const createTable = `
+ 
+  const createTableSql = `
     CREATE TABLE IF NOT EXISTS items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name VARCHAR(255) NOT NULL,
@@ -16,6 +27,11 @@ export function initializeDatabase() {
       date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `;
+
+  db.exec(createTableSql);
   
-  db.exec(createTable);
+  
 }
+
+
+export default db;
